@@ -1,4 +1,8 @@
 {
+    "name": "sanderdlm/skeleton",
+    "description": "Skeleton for a PHP project",
+    "type": "project",
+    "license": "MIT",
     "require": {
         "php": "^8.3",
         "twig/twig": "^3.7",
