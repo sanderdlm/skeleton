@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>SPA</title>
+    <meta name="description" content="Demo SPA with PHP and HTMX">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="flex">
+    <header>
+        <nav hx-boost="true">
+            <a class="logo" href="/">Logo</a>
+            <ul>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</body>
+</html>
