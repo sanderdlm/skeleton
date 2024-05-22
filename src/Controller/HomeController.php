@@ -18,6 +18,6 @@ final readonly class HomeController implements ControllerInterface
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        return new HtmlResponse($this->twig->load('home.twig')->render());
+        return new HtmlResponse($this->twig->load('pages/home.twig')->render());
     }
 }

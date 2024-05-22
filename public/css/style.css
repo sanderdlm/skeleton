@@ -7,9 +7,6 @@
 :root {
     --mine-shaft: #212121;
     --concrete: #fafafa;
-    --red: #ee5141;
-    --green: #507f50;
-    --rock: #878B51;
     --white: #ffffff;
     --azure: #2940A8;
 
@@ -17,7 +14,8 @@
     --color-background: var(--concrete);
     --color-accent: var(--azure);
 
-    --breathe: 1rem;
+    --spacing: 2rem;
+    --double: calc(var(--spacing) * 2);
     --font-size: 1.4rem;
 }
 
@@ -30,11 +28,16 @@ body {
     background-color: var(--color-background);
     max-width: 60rem;
     margin: 0 auto;
-    padding: 4rem 0;
+    padding: var(--spacing) 0;
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
 }
 
 .flow > * + * {
-    margin-top: var(--breathe);
+    margin-top: var(--spacing);
 }
 
 .flex {
@@ -42,7 +45,7 @@ body {
 }
 
 header {
-    padding: 0 5rem;
+    padding: 0 var(--double);
 }
 
 nav {
@@ -52,27 +55,22 @@ nav {
         list-style: none;
 
         li + li {
-            margin-top: 1rem;
+            margin-top: var(--spacing);
         }
     }
 }
 
 .logo {
     display: block;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing);
 }
 
 main {
     color: var(--color-accent);
-    padding: 2rem;
+    padding: var(--spacing);
     width: 100%;
     background-color: var(--white);
     border-radius: 2rem;
-}
-
-a {
-    color: var(--color-accent);
-    text-decoration: none;
 }
 
 @media (max-width: 60rem) {

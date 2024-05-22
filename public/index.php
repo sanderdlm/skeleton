@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Controller\AboutController;
+use App\Controller\SearchController;
 use App\Controller\HomeController;
 use DI\ContainerBuilder;
 use FastRoute\RouteCollector;
@@ -39,8 +39,8 @@ $container = $containerBuilder->build();
 
 // Define the routes
 $routes = simpleDispatcher(function (RouteCollector $r) {
-    $r->get('/', HomeController::class);
-    $r->get('/about', AboutController::class);
+    $r->addRoute('GET', '/', HomeController::class);
+    $r->addRoute('GET', '/search', SearchController::class);
 });
 
 // Build the middleware queue
