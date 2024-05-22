@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controller\SearchController;
 use App\Controller\HomeController;
+use App\Controller\StyleController;
 use DI\ContainerBuilder;
 use FastRoute\RouteCollector;
 use Laminas\Diactoros\ServerRequestFactory;
@@ -41,6 +42,7 @@ $container = $containerBuilder->build();
 $routes = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/', HomeController::class);
     $r->addRoute('GET', '/search', SearchController::class);
+    $r->addRoute('GET', '/style', StyleController::class);
 });
 
 // Build the middleware queue

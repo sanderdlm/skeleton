@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 
-final readonly class SearchController implements ControllerInterface
+final readonly class StyleController implements ControllerInterface
 {
     public function __construct(
         private Environment $twig
@@ -18,8 +18,8 @@ final readonly class SearchController implements ControllerInterface
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        return new HtmlResponse($this->twig->load('pages/search.twig')->render([
-            'title' => 'Search',
+        return new HtmlResponse($this->twig->load('pages/style.twig')->render([
+            'title' => 'Style',
         ]));
     }
 }

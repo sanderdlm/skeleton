@@ -2,12 +2,18 @@
 
 namespace App\Test;
 
-use PHPUnit\Framework\TestCase;
-
-class ExampleTest extends TestCase
+class ExampleTest extends BaseTestCase
 {
     public function testExample(): void
     {
-        $this->assertTrue(true);
+        // Arrange
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/';
+
+        // Act
+        $output = $this->getApplicationOutput();
+
+        // Assert
+        $this->assertHasTagWithContent('h1', 'Home', $output);
     }
 }
