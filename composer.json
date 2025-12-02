@@ -47,5 +47,11 @@
             "@phpstan",
             "@phpcs"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        },
+        "github-protocols": ["https"]
     }
 }
