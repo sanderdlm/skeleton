@@ -47,8 +47,5 @@
             "@phpstan",
             "@phpcs"
         ]
-    },
-    "config": {
-        "github-protocols": ["https"]
     }
 }
