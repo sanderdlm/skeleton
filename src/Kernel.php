@@ -20,7 +20,7 @@ use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;
 
-use function FastRoute\simpleDispatcher;
+use function FastRoute\cachedDispatcher;
 
 final readonly class Kernel
 {
@@ -59,10 +59,13 @@ final readonly class Kernel
         $container = $containerBuilder->build();
 
         // Define the routes
-        $routes = simpleDispatcher(function (RouteCollector $r) {
+        $routes = cachedDispatcher(function (RouteCollector $r) {
             $r->addRoute('GET', '/', HomeController::class);
             $r->addRoute('GET', '/api/status', ApiController::class);
-        });
+        }, [
+            'cacheFile' => __DIR__ . '/../var/cache/routes.cache.php',
+            'cacheDisabled' => $isDebug,
+        ]);
 
         // Build the middleware queue
         $queue[] = new ErrorHandler([new HtmlFormatter()]);
