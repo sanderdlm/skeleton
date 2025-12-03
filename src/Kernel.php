@@ -32,13 +32,20 @@ final readonly class Kernel
         $dotenv = Dotenv::createImmutable($projectRoot);
         $dotenv->safeLoad();
 
+        $isDebug = array_key_exists('APP_ENV', $_ENV) && $_ENV['APP_ENV'] === 'dev';
+
         // Initialize PSR-11 container
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->useAutowiring(true);
 
         // Initialize Twig
         $loader = new FilesystemLoader($projectRoot . '/templates');
-        $twig = new Environment($loader, ['debug' => true]);
+        $twig = new Environment($loader, [
+            'cache' => __DIR__ . '/../var/cache/twig',
+            'debug' => $isDebug,
+            'auto_reload' => $isDebug,
+        ]);
+
         $twig->addExtension(new DebugExtension());
 
         // Set container definitions

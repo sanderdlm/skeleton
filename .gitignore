@@ -4,3 +4,4 @@ composer.lock
 .phpcs-cache
 .phpunit.cache
 .env
+var/
