@@ -37,6 +37,9 @@ final readonly class Kernel
         // Initialize PSR-11 container
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->useAutowiring(true);
+        if (!$isDebug) {
+            $containerBuilder->enableCompilation(__DIR__ . '/../var/cache');
+        }
 
         // Initialize Twig
         $loader = new FilesystemLoader($projectRoot . '/templates');
