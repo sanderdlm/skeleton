@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
-abstract class BaseTestCase extends TestCase
+abstract class AbstractTestCase extends TestCase
 {
     protected Kernel $kernel;
 
@@ -20,29 +20,34 @@ abstract class BaseTestCase extends TestCase
         $this->kernel = new Kernel(__DIR__ . '/..');
     }
 
+    /**
+     * @param array<non-empty-string, array<array-key, string>|string> $headers
+     */
     protected function get(string $uri, array $headers = []): ResponseInterface
     {
         return $this->request('GET', $uri, headers: $headers);
     }
 
+    /**
+     * @param array<non-empty-string, array<array-key, string>|string> $headers
+     */
     protected function post(string $uri, array $body = [], array $headers = []): ResponseInterface
     {
         return $this->request('POST', $uri, body: $body, headers: $headers);
     }
 
-    protected function request(
-        string $method,
-        string $uri,
-        array $body = [],
-        array $headers = []
-    ): ResponseInterface {
+    /**
+     * @param array<non-empty-string, array<array-key, string>|string> $headers
+     */
+    protected function request(string $method, string $uri, array $body = [], array $headers = []): ResponseInterface
+    {
         $request = new ServerRequest(
             serverParams: [],
             uploadedFiles: [],
             uri: $uri,
             method: $method,
             body: 'php://memory',
-            headers: $headers
+            headers: $headers,
         );
 
         if ($body !== []) {
@@ -52,29 +57,13 @@ abstract class BaseTestCase extends TestCase
         return $this->kernel->dispatch($request);
     }
 
-    protected function assertResponseOk(ResponseInterface $response): void
-    {
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    protected function assertResponseStatus(ResponseInterface $response, int $expectedStatus): void
-    {
-        $this->assertSame($expectedStatus, $response->getStatusCode());
-    }
-
-    protected function assertResponseContains(ResponseInterface $response, string $needle): void
-    {
-        $body = (string) $response->getBody();
-        $this->assertStringContainsString($needle, $body);
-    }
-
     protected function assertSelectorExists(ResponseInterface $response, string $selector): void
     {
         $crawler = new Crawler((string) $response->getBody());
         $this->assertGreaterThan(
             0,
             $crawler->filter($selector)->count(),
-            "Selector '$selector' not found in response"
+            sprintf("Selector '%s' not found in response", $selector),
         );
     }
 
@@ -83,23 +72,15 @@ abstract class BaseTestCase extends TestCase
         $crawler = new Crawler((string) $response->getBody());
         $element = $crawler->filter($selector);
 
-        $this->assertGreaterThan(
-            0,
-            $element->count(),
-            "Selector '$selector' not found in response"
-        );
+        $this->assertGreaterThan(0, $element->count(), sprintf("Selector '%s' not found in response", $selector));
         $this->assertStringContainsString($text, $element->text());
-    }
-
-    protected function getResponseBody(ResponseInterface $response): string
-    {
-        return (string) $response->getBody();
     }
 
     protected function getJsonResponse(ResponseInterface $response): array
     {
-        $decoded = json_decode($this->getResponseBody($response), true);
-        $this->assertIsArray($decoded, 'Response is not valid JSON');
+        // @mago-expect analysis:mixed-assignment
+        $decoded = json_decode((string) $response->getBody(), true);
+        $this->assertIsArray($decoded, 'Response body is not valid JSON array');
         return $decoded;
     }
 }

@@ -12,14 +12,16 @@ use Twig\Environment;
 final readonly class HomeController implements ControllerInterface
 {
     public function __construct(
-        private Environment $twig
+        private Environment $twig,
     ) {
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        return new HtmlResponse($this->twig->load('pages/home.twig')->render([
-            'title' => 'Home',
-        ]));
+        return new HtmlResponse($this->twig
+            ->load('pages/home.twig')
+            ->render([
+                'title' => 'Home',
+            ]));
     }
 }

@@ -59,7 +59,7 @@ final readonly class Kernel
         $container = $containerBuilder->build();
 
         // Define the routes
-        $routes = cachedDispatcher(function (RouteCollector $r) {
+        $routes = cachedDispatcher(static function (RouteCollector $r) {
             $r->addRoute('GET', '/', HomeController::class);
             $r->addRoute('GET', '/api/status', ApiController::class);
         }, [
@@ -68,6 +68,7 @@ final readonly class Kernel
         ]);
 
         // Build the middleware queue
+        $queue = [];
         $queue[] = new ErrorHandler([new HtmlFormatter()]);
         $queue[] = new FastRoute($routes);
         $queue[] = new RequestHandler($container);
