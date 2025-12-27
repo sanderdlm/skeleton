@@ -74,6 +74,11 @@ jobs:
             echo "Waiting for server... (attempt $i/10)"
             sleep 1
           done
+          # Verify server is actually ready
+          if ! curl -s http://localhost:8080/ > /dev/null; then
+            echo "❌ Server failed to start after 10 attempts"
+            exit 1
+          fi
 
       - name: Test homepage
         run: |
