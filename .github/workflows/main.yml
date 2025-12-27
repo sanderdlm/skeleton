@@ -54,7 +54,10 @@ jobs:
       - name: Create project from template
         run: |
           cd /tmp
-          composer create-project sanderdlm/skeleton test-project --repository='{"type":"path","url":"${{ github.workspace }}","options":{"symlink":false}}' --stability=dev --no-interaction
+          composer create-project sanderdlm/skeleton test-project \
+            --repository='{"type":"path","url":"${{ github.workspace }}","options":{"symlink":false}}' \
+            --stability=dev \
+            --no-interaction
 
       - name: Setup environment
         run: |
