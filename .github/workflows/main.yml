@@ -37,3 +37,44 @@ jobs:
           composer-options: "--optimize-autoloader"
 
       - run: composer ${{ matrix.task }}
+
+  create-project-test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4.8"
+          tools: composer:v2
+          coverage: none
+          ini-values: memory_limit=-1
+
+      - name: Create project from template
+        run: |
+          cd /tmp
+          composer create-project sanderdlm/skeleton test-project --repository='{"type":"path","url":"${{ github.workspace }}","options":{"symlink":false}}' --stability=dev --no-interaction
+
+      - name: Setup environment
+        run: |
+          cd /tmp/test-project
+          cp .env.example .env
+
+      - name: Start built-in webserver
+        run: |
+          cd /tmp/test-project
+          php -S localhost:8080 -t public/ &
+          sleep 3
+
+      - name: Test homepage
+        run: |
+          response=$(curl -s http://localhost:8080/)
+          echo "Response content:"
+          echo "$response"
+          if echo "$response" | grep -q "Welcome 🤖"; then
+            echo "✅ Homepage contains expected content"
+          else
+            echo "❌ Homepage does not contain expected content"
+            exit 1
+          fi
