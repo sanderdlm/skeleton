@@ -65,7 +65,15 @@ jobs:
         run: |
           cd /tmp/test-project
           php -S localhost:8080 -t public/ &
-          sleep 3
+          # Wait for server to be ready
+          for i in {1..10}; do
+            if curl -s http://localhost:8080/ > /dev/null; then
+              echo "✅ Server is ready"
+              break
+            fi
+            echo "Waiting for server... (attempt $i/10)"
+            sleep 1
+          done
 
       - name: Test homepage
         run: |
