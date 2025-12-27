@@ -69,16 +69,18 @@ jobs:
           cd /tmp/test-project
           php -S localhost:8080 -t public/ &
           # Wait for server to be ready
+          server_ready=false
           for i in {1..10}; do
             if curl -s http://localhost:8080/ > /dev/null; then
               echo "✅ Server is ready"
+              server_ready=true
               break
             fi
             echo "Waiting for server... (attempt $i/10)"
             sleep 1
           done
-          # Verify server is actually ready
-          if ! curl -s http://localhost:8080/ > /dev/null; then
+          # Fail if server never became ready
+          if [ "$server_ready" = "false" ]; then
             echo "❌ Server failed to start after 10 attempts"
             exit 1
           fi
