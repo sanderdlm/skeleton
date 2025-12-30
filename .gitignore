@@ -1,6 +1,4 @@
 vendor/
 .idea
-.phpcs-cache
-.phpunit.cache
 .env
 var/

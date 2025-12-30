@@ -6,7 +6,9 @@ php-version = "8.4.8"
 workspace = "."
 paths = ["src/", "tests/"]
 includes = ["vendor"]
-excludes = []
+excludes = [
+    "vendor/nikic/fast-route/test"
+]
 
 [formatter]
 print-width = 120

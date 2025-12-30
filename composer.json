@@ -38,6 +38,7 @@
             "php -S localhost:8080 -t public/"
         ],
         "test": "phpunit",
+        "coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text",
         "analyze": "vendor/bin/mago analyze",
         "lint": "vendor/bin/mago lint",
         "fix": "vendor/bin/mago lint --fix",
