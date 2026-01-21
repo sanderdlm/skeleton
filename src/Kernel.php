@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Controller\ApiController;
 use App\Controller\HomeController;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
@@ -14,6 +13,7 @@ use Middlewares\ErrorHandler;
 use Middlewares\FastRoute;
 use Middlewares\RequestHandler;
 use Middlewares\Utils\Dispatcher;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
@@ -24,6 +24,7 @@ use function FastRoute\cachedDispatcher;
 
 final readonly class Kernel
 {
+    private ContainerInterface $container;
     private Dispatcher $dispatcher;
 
     public function __construct(string $projectRoot)
@@ -32,7 +33,7 @@ final readonly class Kernel
         $dotenv = Dotenv::createImmutable($projectRoot);
         $dotenv->safeLoad();
 
-        $isDebug = array_key_exists('APP_ENV', $_ENV) && $_ENV['APP_ENV'] === 'dev';
+        $isDebug = array_key_exists('APP_ENV', $_ENV) && $_ENV['APP_ENV'] !== 'prod';
 
         // Initialize PSR-11 container
         $containerBuilder = new ContainerBuilder();
@@ -44,7 +45,7 @@ final readonly class Kernel
         // Initialize Twig
         $loader = new FilesystemLoader($projectRoot . '/templates');
         $twig = new Environment($loader, [
-            'cache' => __DIR__ . '/../var/cache/twig',
+            'cache' => $isDebug ? false : __DIR__ . '/../var/cache/twig',
             'debug' => $isDebug,
             'auto_reload' => $isDebug,
         ]);
@@ -56,12 +57,11 @@ final readonly class Kernel
             Environment::class => $twig,
         ]);
 
-        $container = $containerBuilder->build();
+        $this->container = $containerBuilder->build();
 
         // Define the routes
         $routes = cachedDispatcher(static function (RouteCollector $r) {
             $r->addRoute('GET', '/', HomeController::class);
-            $r->addRoute('GET', '/api/status', ApiController::class);
         }, [
             'cacheFile' => __DIR__ . '/../var/cache/routes.cache.php',
             'cacheDisabled' => $isDebug,
@@ -71,7 +71,7 @@ final readonly class Kernel
         $queue = [];
         $queue[] = new ErrorHandler([new HtmlFormatter()]);
         $queue[] = new FastRoute($routes);
-        $queue[] = new RequestHandler($container);
+        $queue[] = new RequestHandler($this->container);
 
         $this->dispatcher = new Dispatcher($queue);
     }
@@ -79,5 +79,32 @@ final readonly class Kernel
     public function dispatch(ServerRequestInterface $request): ResponseInterface
     {
         return $this->dispatcher->dispatch($request);
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     * @return T
+     */
+    public function getService(string $className): object
+    {
+        $service = $this->container->get($className);
+
+        if (!is_object($service)) {
+            throw new \RuntimeException(sprintf(
+                'Requested service %s did not return a valid object.',
+                $className
+            ));
+        }
+
+        if (!$service instanceof $className) {
+            throw new \RuntimeException(sprintf(
+                'Requested service %s did not return a valid instance of %s.',
+                $className,
+                $className
+            ));
+        }
+
+        return $service;
     }
 }

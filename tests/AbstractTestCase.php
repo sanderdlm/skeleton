@@ -29,6 +29,7 @@ abstract class AbstractTestCase extends TestCase
     }
 
     /**
+     * @param array<non-empty-string, array<array-key, string>|string> $body
      * @param array<non-empty-string, array<array-key, string>|string> $headers
      */
     protected function post(string $uri, array $body = [], array $headers = []): ResponseInterface
@@ -37,6 +38,7 @@ abstract class AbstractTestCase extends TestCase
     }
 
     /**
+     * @param array<non-empty-string, array<array-key, string>|string> $body
      * @param array<non-empty-string, array<array-key, string>|string> $headers
      */
     protected function request(string $method, string $uri, array $body = [], array $headers = []): ResponseInterface
@@ -76,9 +78,11 @@ abstract class AbstractTestCase extends TestCase
         $this->assertStringContainsString($text, $element->text());
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     protected function getJsonResponse(ResponseInterface $response): array
     {
-        // @mago-expect analysis:mixed-assignment
         $decoded = json_decode((string) $response->getBody(), true);
         $this->assertIsArray($decoded, 'Response body is not valid JSON array');
         return $decoded;

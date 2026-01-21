@@ -1,1 +1,0 @@
-rsync -a <local-path-to-your-project> <remote-ssh-user>@<your-server>:<remote-path-to-document-root>
