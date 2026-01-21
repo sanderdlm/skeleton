@@ -99,9 +99,8 @@ final readonly class Kernel
 
         if (!$service instanceof $className) {
             throw new \RuntimeException(sprintf(
-                'Requested service %s did not return a valid instance of %s.',
+                'Requested service did not return a valid instance of %s.',
                 $className,
-                $className
             ));
         }
 
