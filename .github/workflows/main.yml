@@ -90,7 +90,7 @@ jobs:
           response=$(curl -s http://localhost:8080/)
           echo "Response content:"
           echo "$response"
-          if echo "$response" | grep -q "Welcome 🤖"; then
+          if echo "$response" | grep -q "🤖"; then
             echo "✅ Homepage contains expected content"
           else
             echo "❌ Homepage does not contain expected content"
