@@ -10,13 +10,13 @@ final class KernelTest extends AbstractTestCase
 {
     protected function setUp(): void
     {
-        // Force dev environment to prod for testing purposes
+        // Force dev environment to prod for cache testing purposes
         $_ENV['APP_ENV'] = 'prod';
 
         parent::setUp();
     }
 
-    public function testAppEnvIsSetToDev(): void
+    public function testAppEnvIsSetToProd(): void
     {
         static::assertSame('prod', $_ENV['APP_ENV']);
     }
@@ -53,6 +53,6 @@ final class KernelTest extends AbstractTestCase
 
         $filesystem->remove(__DIR__ . '/../var/cache');
 
-        $_ENV['APP_ENV'] = 'dev';
+        $_ENV['APP_ENV'] = 'test';
     }
 }
