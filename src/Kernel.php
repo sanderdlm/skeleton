@@ -16,6 +16,7 @@ use Middlewares\Utils\Dispatcher;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use PSR7Sessions\Storageless\Http\SessionMiddleware;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;
@@ -70,6 +71,10 @@ final readonly class Kernel
         // Build the middleware queue
         $queue = [];
         $queue[] = new ErrorHandler([new HtmlFormatter()]);
+        $queue[] = SessionMiddleware::fromSymmetricKeyDefaults(
+            'ahzLRotCm4Lvc00yVETWM1aXSdziC3ZG2ouKApJMCws=',
+            1200 // 20 minutes
+        );
         $queue[] = new FastRoute($routes);
         $queue[] = new RequestHandler($this->container);
 
