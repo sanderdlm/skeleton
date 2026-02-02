@@ -8,6 +8,9 @@ use App\Controller\HomeController;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use FastRoute\RouteCollector;
+use Lcobucci\JWT\Configuration as JwtConfiguration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
 use Middlewares\ErrorFormatter\HtmlFormatter;
 use Middlewares\ErrorHandler;
 use Middlewares\FastRoute;
@@ -16,6 +19,8 @@ use Middlewares\Utils\Dispatcher;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use PSR7Sessions\Storageless\Http\Configuration as SessionConfiguration;
+use PSR7Sessions\Storageless\Http\SessionMiddleware;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;
@@ -67,8 +72,19 @@ final readonly class Kernel
             'cacheDisabled' => $isDebug,
         ]);
 
+        // JWT session middleware
+        $sessionMiddleware = new SessionMiddleware(
+            SessionConfiguration::fromJwtConfiguration(
+                JwtConfiguration::forSymmetricSigner(
+                    new Sha256(),
+                    InMemory::base64Encoded('OpcMuKmoxkhzW0Y1iESpjWwL/D3UBdDauJOe742BJ5Q='),
+                )
+            )
+        );
+
         // Build the middleware queue
         $queue = [];
+        $queue[] = $sessionMiddleware;
         $queue[] = new ErrorHandler([new HtmlFormatter()]);
         $queue[] = new FastRoute($routes);
         $queue[] = new RequestHandler($this->container);
