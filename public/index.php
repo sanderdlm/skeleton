@@ -13,4 +13,4 @@ $kernel = new Kernel(__DIR__ . '/..');
 $response = $kernel->dispatch(ServerRequestFactory::fromGlobals());
 
 // 💨
-(new SapiEmitter())->emit($response);
+new SapiEmitter()->emit($response);

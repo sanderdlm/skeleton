@@ -38,6 +38,7 @@ final readonly class Kernel
         $dotenv = Dotenv::createImmutable($projectRoot);
         $dotenv->safeLoad();
 
+        // Determine environment
         $isDebug = array_key_exists('APP_ENV', $_ENV) && $_ENV['APP_ENV'] !== 'prod';
 
         // Initialize PSR-11 container
@@ -54,7 +55,6 @@ final readonly class Kernel
             'debug' => $isDebug,
             'auto_reload' => $isDebug,
         ]);
-
         $twig->addExtension(new DebugExtension());
 
         // Set container definitions
@@ -72,7 +72,7 @@ final readonly class Kernel
             'cacheDisabled' => $isDebug,
         ]);
 
-        // JWT session middleware
+        // Initialize the JWT session middleware
         $sessionMiddleware = new SessionMiddleware(
             SessionConfiguration::fromJwtConfiguration(
                 JwtConfiguration::forSymmetricSigner(
@@ -106,20 +106,14 @@ final readonly class Kernel
     {
         $service = $this->container->get($className);
 
-        if (!is_object($service)) {
-            throw new \RuntimeException(sprintf(
-                'Requested service %s did not return a valid object.',
-                $className
-            ));
-        }
-
         if (!$service instanceof $className) {
             throw new \RuntimeException(sprintf(
-                'Requested service did not return a valid instance of %s.',
+                'Requested service %s did not return a valid instance.',
                 $className,
             ));
         }
 
+        /** @var T $service */
         return $service;
     }
 }
