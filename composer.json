@@ -27,12 +27,7 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/",
-            "PSR7Sessions\\Storageless\\": "vendor/psr7-sessions/storageless/src/Storageless/",
-            "Psr\\Http\\Server\\": "vendor/psr/http-server-middleware/src/",
-            "Lcobucci\\JWT\\": "vendor/lcobucci/jwt/src/",
-            "Dflydev\\FigCookies\\": "vendor/dflydev/fig-cookies/src/FigCookies/",
-            "Psr\\Clock\\": "vendor/psr/clock/src/"
+            "App\\": "src/"
         }
     },
     "autoload-dev":{

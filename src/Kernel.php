@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\Controller\HomeController;
+use App\Controller\SessionController;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use FastRoute\RouteCollector;
@@ -63,6 +64,7 @@ final readonly class Kernel
         // Define the routes
         $routes = cachedDispatcher(static function (RouteCollector $r) {
             $r->addRoute('GET', '/', HomeController::class);
+            $r->addRoute('GET', '/session', SessionController::class);
         }, [
             'cacheFile' => __DIR__ . '/../var/cache/routes.cache.php',
             'cacheDisabled' => $isDebug,
