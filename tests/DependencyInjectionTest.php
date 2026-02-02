@@ -45,6 +45,7 @@ final class DependencyInjectionTest extends AbstractTestCase
     {
         $this->expectException(\Exception::class);
 
-        $this->kernel->getService('NonExistentService');
+        /** @phpstan-ignore argument.type */
+        $this->kernel->getService('App\SomeNonExistentService');
     }
 }
