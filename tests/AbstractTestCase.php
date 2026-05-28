@@ -6,7 +6,6 @@ namespace App\Test;
 
 use App\Kernel;
 use App\Service\SchemaManager;
-use Doctrine\DBAL\Connection;
 use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -14,25 +13,14 @@ use Symfony\Component\DomCrawler\Crawler;
 
 abstract class AbstractTestCase extends TestCase
 {
-    private static ?Kernel $sharedKernel = null;
     protected Kernel $kernel;
 
     protected function setUp(): void
     {
         parent::setUp();
-        if (self::$sharedKernel === null) {
-            self::$sharedKernel = new Kernel(__DIR__ . '/..');
-            self::$sharedKernel->getService(SchemaManager::class)->clearDatabase();
-            self::$sharedKernel->getService(SchemaManager::class)->initializeDatabase();
-        }
-        $this->kernel = self::$sharedKernel;
-        $this->kernel->getService(Connection::class)->beginTransaction();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->kernel->getService(Connection::class)->rollBack();
-        parent::tearDown();
+        $this->kernel = new Kernel(__DIR__ . '/..');
+        $this->kernel->getService(SchemaManager::class)->clearDatabase();
+        $this->kernel->getService(SchemaManager::class)->initializeDatabase();
     }
 
     /**
