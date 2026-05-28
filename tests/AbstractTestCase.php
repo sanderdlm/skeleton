@@ -8,7 +8,6 @@ use App\Kernel;
 use App\Service\SchemaManager;
 use Doctrine\DBAL\Connection;
 use Laminas\Diactoros\ServerRequest;
-use Laminas\Diactoros\Stream;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\DomCrawler\Crawler;
@@ -57,26 +56,8 @@ abstract class AbstractTestCase extends TestCase
      * @param array<string, mixed> $body
      * @param array<non-empty-string, array<array-key, string>|string> $headers
      */
-    protected function request(
-        string $method,
-        string $uri,
-        array $body = [],
-        array $headers = [],
-        string $contentType = 'json',
-    ): ResponseInterface {
-        $bodyStream = 'php://memory';
-        if ($body !== []) {
-            $bodyStream = new Stream('php://temp', 'wb+');
-            if ($contentType === 'form') {
-                $bodyStream->write(http_build_query($body));
-                $headers['Content-Type'] = 'application/x-www-form-urlencoded';
-            } else {
-                $bodyStream->write(json_encode($body, JSON_THROW_ON_ERROR));
-                $headers['Content-Type'] = 'application/json';
-            }
-            $bodyStream->rewind();
-        }
-
+    protected function request(string $method, string $uri, array $body = [], array $headers = []): ResponseInterface
+    {
         if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true) && !isset($headers['Sec-Fetch-Site'])) {
             $headers['Sec-Fetch-Site'] = 'same-origin';
         }
@@ -86,20 +67,15 @@ abstract class AbstractTestCase extends TestCase
             uploadedFiles: [],
             uri: $uri,
             method: $method,
-            body: $bodyStream,
+            body: 'php://memory',
             headers: $headers,
         );
 
-        return $this->kernel->dispatch($request);
-    }
+        if ($body !== []) {
+            $request = $request->withParsedBody($body);
+        }
 
-    /**
-     * @param array<string, mixed> $body
-     * @param array<non-empty-string, array<array-key, string>|string> $headers
-     */
-    protected function postForm(string $uri, array $body = [], array $headers = []): ResponseInterface
-    {
-        return $this->request('POST', $uri, body: $body, headers: $headers, contentType: 'form');
+        return $this->kernel->dispatch($request);
     }
 
     protected function assertSelectorExists(ResponseInterface $response, string $selector): void
