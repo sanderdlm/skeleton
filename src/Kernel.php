@@ -23,9 +23,15 @@ final readonly class Kernel
         $dotenv = Dotenv::createImmutable($projectRoot);
         $dotenv->safeLoad();
 
-        $isDebug = ($_ENV['APP_ENV'] ?? 'dev') !== 'prod';
+        $environment = $_ENV['APP_ENV'] ?? 'dev';
 
-        $this->container = new ContainerProvider($projectRoot, $isDebug)->create();
+        if (!is_string($environment)) {
+            $environment = 'dev';
+        }
+
+        $isDebug = $environment !== 'prod';
+
+        $this->container = new ContainerProvider($projectRoot, $environment, $isDebug)->create();
         $this->dispatcher = new MiddlewareProvider()->create(
             container: $this->container,
             routes: new RouteProvider($isDebug)->create(),

@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Test;
 
+use App\Kernel;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class CacheTest extends AbstractTestCase
 {
+    private Kernel $prodKernel;
+
     protected function setUp(): void
     {
-        // Force dev environment to prod for cache testing purposes
         $_ENV['APP_ENV'] = 'prod';
-
+        $this->prodKernel = new Kernel(__DIR__ . '/..');
         parent::setUp();
     }
 
@@ -23,9 +25,14 @@ final class CacheTest extends AbstractTestCase
 
     public function testCacheFolderIsInitialized(): void
     {
-        // Make a request to trigger cache creation
-        $response = $this->get('/');
-
+        $request = new \Laminas\Diactoros\ServerRequest(
+            serverParams: [],
+            uploadedFiles: [],
+            uri: '/',
+            method: 'GET',
+            body: 'php://memory',
+        );
+        $response = $this->prodKernel->dispatch($request);
         static::assertSame(200, $response->getStatusCode());
 
         $cacheFolder = __DIR__ . '/../var/cache';
@@ -41,10 +48,10 @@ final class CacheTest extends AbstractTestCase
 
     protected function tearDown(): void
     {
-        $filesystem = $this->kernel->getService(FileSystem::class);
-
+        $filesystem = new Filesystem();
         $filesystem->remove(__DIR__ . '/../var/cache');
-
         $_ENV['APP_ENV'] = 'test';
+
+        parent::tearDown();
     }
 }

@@ -5,19 +5,35 @@ declare(strict_types=1);
 namespace App\Test;
 
 use App\Kernel;
+use App\Service\SchemaManager;
+use Doctrine\DBAL\Connection;
 use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\Stream;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
 abstract class AbstractTestCase extends TestCase
 {
+    private static ?Kernel $sharedKernel = null;
     protected Kernel $kernel;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->kernel = new Kernel(__DIR__ . '/..');
+        if (self::$sharedKernel === null) {
+            self::$sharedKernel = new Kernel(__DIR__ . '/..');
+            self::$sharedKernel->getService(SchemaManager::class)->clearDatabase();
+            self::$sharedKernel->getService(SchemaManager::class)->initializeDatabase();
+        }
+        $this->kernel = self::$sharedKernel;
+        $this->kernel->getService(Connection::class)->beginTransaction();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->kernel->getService(Connection::class)->rollBack();
+        parent::tearDown();
     }
 
     /**
@@ -29,7 +45,7 @@ abstract class AbstractTestCase extends TestCase
     }
 
     /**
-     * @param array<non-empty-string, array<array-key, string>|string> $body
+     * @param array<string, mixed> $body
      * @param array<non-empty-string, array<array-key, string>|string> $headers
      */
     protected function post(string $uri, array $body = [], array $headers = []): ResponseInterface
@@ -38,25 +54,52 @@ abstract class AbstractTestCase extends TestCase
     }
 
     /**
-     * @param array<non-empty-string, array<array-key, string>|string> $body
+     * @param array<string, mixed> $body
      * @param array<non-empty-string, array<array-key, string>|string> $headers
      */
-    protected function request(string $method, string $uri, array $body = [], array $headers = []): ResponseInterface
-    {
+    protected function request(
+        string $method,
+        string $uri,
+        array $body = [],
+        array $headers = [],
+        string $contentType = 'json',
+    ): ResponseInterface {
+        $bodyStream = 'php://memory';
+        if ($body !== []) {
+            $bodyStream = new Stream('php://temp', 'wb+');
+            if ($contentType === 'form') {
+                $bodyStream->write(http_build_query($body));
+                $headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            } else {
+                $bodyStream->write(json_encode($body, JSON_THROW_ON_ERROR));
+                $headers['Content-Type'] = 'application/json';
+            }
+            $bodyStream->rewind();
+        }
+
+        if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true) && !isset($headers['Sec-Fetch-Site'])) {
+            $headers['Sec-Fetch-Site'] = 'same-origin';
+        }
+
         $request = new ServerRequest(
             serverParams: [],
             uploadedFiles: [],
             uri: $uri,
             method: $method,
-            body: 'php://memory',
+            body: $bodyStream,
             headers: $headers,
         );
 
-        if ($body !== []) {
-            $request = $request->withParsedBody($body);
-        }
-
         return $this->kernel->dispatch($request);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param array<non-empty-string, array<array-key, string>|string> $headers
+     */
+    protected function postForm(string $uri, array $body = [], array $headers = []): ResponseInterface
+    {
+        return $this->request('POST', $uri, body: $body, headers: $headers, contentType: 'form');
     }
 
     protected function assertSelectorExists(ResponseInterface $response, string $selector): void
@@ -86,5 +129,15 @@ abstract class AbstractTestCase extends TestCase
         $decoded = json_decode((string) $response->getBody(), true);
         $this->assertIsArray($decoded, 'Response body is not valid JSON array');
         return $decoded;
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     * @return T
+     */
+    protected function getService(string $className): object
+    {
+        return $this->kernel->getService($className);
     }
 }
