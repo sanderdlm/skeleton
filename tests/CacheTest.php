@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace App\Test;
 
-use App\Kernel;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class CacheTest extends AbstractTestCase
 {
-    private Kernel $prodKernel;
-
     protected function setUp(): void
     {
         $_ENV['APP_ENV'] = 'prod';
-        $this->prodKernel = new Kernel(__DIR__ . '/..');
         parent::setUp();
     }
 
@@ -25,14 +21,7 @@ final class CacheTest extends AbstractTestCase
 
     public function testCacheFolderIsInitialized(): void
     {
-        $request = new \Laminas\Diactoros\ServerRequest(
-            serverParams: [],
-            uploadedFiles: [],
-            uri: '/',
-            method: 'GET',
-            body: 'php://memory',
-        );
-        $response = $this->prodKernel->dispatch($request);
+        $response = $this->get('/');
         static::assertSame(200, $response->getStatusCode());
 
         $cacheFolder = __DIR__ . '/../var/cache';
