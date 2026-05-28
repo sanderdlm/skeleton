@@ -37,9 +37,7 @@ final readonly class ContainerProvider
         $translator = $this->createTranslator();
         $twig->addExtension(new TranslationExtension($translator));
 
-        $environment = $this->environment;
-        $projectRoot = $this->projectRoot;
-        $connectionProvider = new DatabaseConnectionProvider($environment, $projectRoot);
+        $connectionProvider = new DatabaseConnectionProvider($this->environment, $this->projectRoot);
 
         $containerBuilder->addDefinitions([
             Environment::class => $twig,
