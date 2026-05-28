@@ -106,14 +106,4 @@ abstract class AbstractTestCase extends TestCase
         $this->assertIsArray($decoded, 'Response body is not valid JSON array');
         return $decoded;
     }
-
-    /**
-     * @template T of object
-     * @param class-string<T> $className
-     * @return T
-     */
-    protected function getService(string $className): object
-    {
-        return $this->kernel->getService($className);
-    }
 }
