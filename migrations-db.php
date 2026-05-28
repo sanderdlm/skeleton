@@ -9,7 +9,10 @@ use Doctrine\Migrations\DependencyFactory;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
+
 $config = new PhpFile(__DIR__ . '/migrations.php');
-$connection = DatabaseConnectionFactory::create('dev', __DIR__);
+$environment = $_ENV['APP_ENV'] ?? 'prod';
+$connection = DatabaseConnectionFactory::create($environment, __DIR__);
 
 return DependencyFactory::fromConnection($config, new ExistingConnection($connection));
